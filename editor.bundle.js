@@ -1605,21 +1605,24 @@
         }
         ,
         addBoosterPaletteButton = function() {
-            // Booster block: reuses the ordinary Straight road part, tagged with
-            // the Custom8 color id as an internal "this is a booster" flag. This
-            // keeps it fully compatible with the existing track format and the
-            // physics engine (no new part type, no wasm changes needed) while
-            // still being placeable from the editor as its own distinct button.
+            // Booster block: reuses the ordinary Block part (a flat, drivable
+            // slab -- the same one used for platforms/ramps), tagged with the
+            // Custom8 color id as an internal "this is a booster" flag. Block
+            // is the only category with custom colors baked in, which is why
+            // it's the base instead of a plain road tile. This keeps it fully
+            // compatible with the existing track format and the physics
+            // engine (no new part type, no wasm changes needed) while still
+            // being placeable from the editor as its own distinct button.
             const entries = get(this, editor_partEntries, "f");
-            const straightIndex = entries.findIndex((e => e.id == Part.Straight));
-            if (straightIndex < 0)
+            const blockIndex = entries.findIndex((e => e.id == Part.Block));
+            if (blockIndex < 0)
                 return;
-            const straightEntry = entries[straightIndex]
+            const blockEntry = entries[blockIndex]
               , boosterColor = TrackPartColorId.Custom8
-              , colorBtn = straightEntry.colorButtons.find((([e]) => e == boosterColor));
+              , colorBtn = blockEntry.colorButtons.find((([e]) => e == boosterColor));
             if (null == colorBtn)
                 return;
-            const specialCategory = entries.find((e => e.isStart))?.category ?? straightEntry.category
+            const specialCategory = entries.find((e => e.isStart))?.category ?? blockEntry.category
               , categoryEntry = get(this, editor_categoryEntries, "f").find((e => e.category == specialCategory))
               , panel = categoryEntry ? categoryEntry.partPanel : get(this, editor_partPanelContainer, "f")
               , button = document.createElement("button");
@@ -1628,7 +1631,7 @@
             const img = document.createElement("img");
             img.className = "loading",
             button.appendChild(img);
-            const mesh = get(this, editor_partRegistry, "f").getPart(Part.Straight).colors.get(boosterColor);
+            const mesh = get(this, editor_partRegistry, "f").getPart(Part.Block).colors.get(boosterColor);
             null != mesh && renderPartThumbnail(mesh).then((e => {
                 img.src = e,
                 img.className = ""
@@ -1636,7 +1639,7 @@
             )),
             button.addEventListener("click", ( () => {
                 get(this, editor_audioManager, "f").playUIClick(),
-                get(this, Ft, "m", selectPart).call(this, straightIndex),
+                get(this, Ft, "m", selectPart).call(this, blockIndex),
                 colorBtn[1].click(),
                 button.classList.add("selected")
             }

@@ -17,9 +17,9 @@
 // ==========================================================================
 
 // Booster zones are now populated automatically from the track itself (see
-// the Track.setPart patch in main.bundle.js) whenever a Straight road part
-// tagged with the Custom8 color is loaded -- which is exactly what placing
-// the new "Booster" button in the editor's Special panel creates. You don't
+// the Track.setPart patch in main.bundle.js) whenever a Block part tagged
+// with the Custom8 color is loaded -- which is exactly what placing the
+// new "Booster" button in the editor's Special panel creates. You don't
 // need to edit this list by hand anymore; it starts empty and fills in as
 // the track loads.
 window.BOOST_ZONES = [];

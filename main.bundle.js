@@ -29139,7 +29139,7 @@
                       , g = new THREE.Vector3(e * M.partSize,t * M.partSize,n * M.partSize)
                       , v = (new THREE.Matrix4).compose(g, f, new THREE.Vector3(1,1,1))
                       , y = new T(e,t,n,r,a,o,p,v,d,u);
-                    0 === i && 40 === o && window.__registerBoosterZone && window.__registerBoosterZone(g, f);
+                    29 === i && 40 === o && window.__registerBoosterZone && window.__registerBoosterZone(g, f);
                     m.get(this, l, "f").push(y);
                     p.configuration.tiles.rotated(r, a).forEach(( (i, r, a) => {
                         const s = (e + i).toString() + "|" + (t + r).toString() + "|" + (n + a).toString();
