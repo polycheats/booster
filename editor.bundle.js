@@ -1073,7 +1073,7 @@
             }
             return n
         }
-        var Ft, editor_audioManager, editor_lastEditSoundTime, editor_localization, editor_renderer, editor_transitionManager, editor_track, editor_partRegistry, editor_trackStorage, editor_customTrackManager, editor_networkManager, editor_userProfileManager, editor_dialogManager, editor_inputManager, editor_settingsManager, editor_testCallback, editor_isActive, editor_containerElement, editor_topBar, editor_toastElement, editor_toastTimeout, editor_pasteButton, editor_undoButton, editor_redoButton, editor_partPanelContainer, editor_categoryBar, editor_heightSelectorUI, editor_checkpointOrderUI, editor_exportUI, editor_loadingScreen, editor_helpUI, editor_sideToolbar, editor_trackSettingsUI, editor_activeModal, editor_settingsButton, editor_onMouseMove, editor_onMouseDown, editor_onMouseUp, editor_onMouseOut, editor_onTouchStart, editor_onClick, editor_onKeyDown, editor_onKeyUp, editor_onWheel, editor_onBeforeUnload, editor_cameraRig, editor_orbitControls, editor_isHeightModifierHeld, editor_keyForward, editor_keyRight, editor_keyBackward, editor_keyLeft, editor_keyPitchUp, editor_keyPitchDown, editor_keyYawLeft, editor_keyYawRight, editor_isSaved, editor_raycaster, editor_gridPlane, editor_previewGroup, editor_ghostMaterial, editor_previewMeshes, editor_tileIndicatorMaterial, editor_tileIndicatorGeometry, editor_tileIndicatorMesh, editor_isDeleteKeyHeld, editor_isLeftMouseDown, editor_mouseNDC, editor_lastTouchTimestamp, editor_isTapPending, editor_cursorGridPos, editor_minYOffset, editor_currentRotation, editor_currentAxis, editor_isLargeGrid, editor_isDeleteMode, editor_lastPlacement, editor_lastDeletion, editor_trackName, editor_trackAuthor, editor_lastModified, editor_undoStack, editor_redoStack, editor_checkpointLabels3D, editor_partEntries, editor_selectedPartIndex, editor_selectedColor, editor_isCopyMode, editor_isCutMode, editor_selectionStart, editor_clipboard, editor_activePlacement, editor_selectionBoxMeshes, editor_lastOverlapCheckPos, editor_categoryEntries, editor_selectedCategory, editor_isTyping, updateSelectionBoxVisual, copyOrCutRegion, activatePaste, placeActiveParts, loadTrackMetadata, setTrackName, setTrackAuthor, confirmExit, testTrack, pickPartUnderCursor, undo, redo, showToast, initPartPalette, getEffectiveColor, setEnvironment, refreshAllThumbnails, rebuildPreviewMesh, selectCategory, selectPart, getCurrentHeight, setHeight, recalcMinYOffset, refreshTrackAfterEdit, playEditSound, getCursorGridPosition, findOverlappingParts, hasOverlappingParts, deletePartsAndRecord, updateKeyboardCamera, isKeyboardInputActive, TrackLoadError = n(6223).A, LoadingScreenUI = n(5302).A;
+        var Ft, editor_audioManager, editor_lastEditSoundTime, editor_localization, editor_renderer, editor_transitionManager, editor_track, editor_partRegistry, editor_trackStorage, editor_customTrackManager, editor_networkManager, editor_userProfileManager, editor_dialogManager, editor_inputManager, editor_settingsManager, editor_testCallback, editor_isActive, editor_containerElement, editor_topBar, editor_toastElement, editor_toastTimeout, editor_pasteButton, editor_undoButton, editor_redoButton, editor_partPanelContainer, editor_categoryBar, editor_heightSelectorUI, editor_checkpointOrderUI, editor_exportUI, editor_loadingScreen, editor_helpUI, editor_sideToolbar, editor_trackSettingsUI, editor_activeModal, editor_settingsButton, editor_onMouseMove, editor_onMouseDown, editor_onMouseUp, editor_onMouseOut, editor_onTouchStart, editor_onClick, editor_onKeyDown, editor_onKeyUp, editor_onWheel, editor_onBeforeUnload, editor_cameraRig, editor_orbitControls, editor_isHeightModifierHeld, editor_keyForward, editor_keyRight, editor_keyBackward, editor_keyLeft, editor_keyPitchUp, editor_keyPitchDown, editor_keyYawLeft, editor_keyYawRight, editor_isSaved, editor_raycaster, editor_gridPlane, editor_previewGroup, editor_ghostMaterial, editor_previewMeshes, editor_tileIndicatorMaterial, editor_tileIndicatorGeometry, editor_tileIndicatorMesh, editor_isDeleteKeyHeld, editor_isLeftMouseDown, editor_mouseNDC, editor_lastTouchTimestamp, editor_isTapPending, editor_cursorGridPos, editor_minYOffset, editor_currentRotation, editor_currentAxis, editor_isLargeGrid, editor_isDeleteMode, editor_lastPlacement, editor_lastDeletion, editor_trackName, editor_trackAuthor, editor_lastModified, editor_undoStack, editor_redoStack, editor_checkpointLabels3D, editor_partEntries, editor_selectedPartIndex, editor_selectedColor, editor_isCopyMode, editor_isCutMode, editor_selectionStart, editor_clipboard, editor_activePlacement, editor_selectionBoxMeshes, editor_lastOverlapCheckPos, editor_categoryEntries, editor_selectedCategory, editor_isTyping, updateSelectionBoxVisual, copyOrCutRegion, activatePaste, placeActiveParts, loadTrackMetadata, setTrackName, setTrackAuthor, confirmExit, testTrack, pickPartUnderCursor, undo, redo, showToast, initPartPalette, addBoosterPaletteButton, getEffectiveColor, setEnvironment, refreshAllThumbnails, rebuildPreviewMesh, selectCategory, selectPart, getCurrentHeight, setHeight, recalcMinYOffset, refreshTrackAfterEdit, playEditSound, getCursorGridPosition, findOverlappingParts, hasOverlappingParts, deletePartsAndRecord, updateKeyboardCamera, isKeyboardInputActive, TrackLoadError = n(6223).A, LoadingScreenUI = n(5302).A;
         editor_audioManager = new WeakMap,
         editor_lastEditSoundTime = new WeakMap,
         editor_localization = new WeakMap,
@@ -1602,6 +1602,49 @@
                 };
                 get(this, editor_partEntries, "f").push(l)
             }
+        }
+        ,
+        addBoosterPaletteButton = function() {
+            // Booster block: reuses the ordinary Straight road part, tagged with
+            // the Custom8 color id as an internal "this is a booster" flag. This
+            // keeps it fully compatible with the existing track format and the
+            // physics engine (no new part type, no wasm changes needed) while
+            // still being placeable from the editor as its own distinct button.
+            const entries = get(this, editor_partEntries, "f");
+            const straightIndex = entries.findIndex((e => e.id == Part.Straight));
+            if (straightIndex < 0)
+                return;
+            const straightEntry = entries[straightIndex]
+              , boosterColor = TrackPartColorId.Custom8
+              , colorBtn = straightEntry.colorButtons.find((([e]) => e == boosterColor));
+            if (null == colorBtn)
+                return;
+            const specialCategory = entries.find((e => e.isStart))?.category ?? straightEntry.category
+              , categoryEntry = get(this, editor_categoryEntries, "f").find((e => e.category == specialCategory))
+              , panel = categoryEntry ? categoryEntry.partPanel : get(this, editor_partPanelContainer, "f")
+              , button = document.createElement("button");
+            button.title = "Booster",
+            panel.appendChild(button);
+            const img = document.createElement("img");
+            img.className = "loading",
+            button.appendChild(img);
+            const mesh = get(this, editor_partRegistry, "f").getPart(Part.Straight).colors.get(boosterColor);
+            null != mesh && renderPartThumbnail(mesh).then((e => {
+                img.src = e,
+                img.className = ""
+            }
+            )),
+            button.addEventListener("click", ( () => {
+                get(this, editor_audioManager, "f").playUIClick(),
+                get(this, Ft, "m", selectPart).call(this, straightIndex),
+                colorBtn[1].click(),
+                button.classList.add("selected")
+            }
+            )),
+            document.addEventListener("click", (e => {
+                e.target != button && button.classList.remove("selected")
+            }
+            ))
         }
         ,
         getEffectiveColor = function() {
@@ -3081,7 +3124,8 @@
             }
             enable() {
                 set(this, editor_isActive, !0, "f"),
-                1 == get(this, editor_partEntries, "f").length && get(this, Ft, "m", initPartPalette).call(this),
+                1 == get(this, editor_partEntries, "f").length && (get(this, Ft, "m", initPartPalette).call(this),
+                addBoosterPaletteButton.call(this)),
                 get(this, editor_checkpointLabels3D, "f")?.dispose(),
                 set(this, editor_checkpointLabels3D, new N(get(this, editor_renderer, "f")), "f"),
                 get(this, editor_checkpointLabels3D, "f").refresh(get(this, editor_track, "f")),

@@ -16,17 +16,32 @@
 // known trade-off of doing this without engine source — see the chat writeup.
 // ==========================================================================
 
-// Edit this list to place booster pads on your track.
-//   x, y, z       - world-space centre of the pad (same coordinates the
-//                   editor / track uses).
-//   yaw           - direction (radians) the booster pushes the car, 0 = +Z.
-//                   Match this to the direction traffic flows over the pad.
-//   halfWidth     - half the pad's width (left/right size).
-//   halfLength    - half the pad's length (the direction cars drive over it).
-//   strength      - 1 = normal boost, 2 = roughly twice as strong, etc.
-window.BOOST_ZONES = [
-    { x: 0, y: 0.1, z: -20, yaw: 0, halfWidth: 1.7, halfLength: 2.2, strength: 1 }
-];
+// Booster zones are now populated automatically from the track itself (see
+// the Track.setPart patch in main.bundle.js) whenever a Straight road part
+// tagged with the Custom8 color is loaded -- which is exactly what placing
+// the new "Booster" button in the editor's Special panel creates. You don't
+// need to edit this list by hand anymore; it starts empty and fills in as
+// the track loads.
+window.BOOST_ZONES = [];
+
+window.__registerBoosterZone = function (worldPos, worldQuat) {
+    // Avoid duplicate entries if setPart is ever called twice for the same
+    // spot (e.g. a track reload on a scene that was never fully cleared).
+    for (const z of window.BOOST_ZONES) {
+        if (Math.abs(z.x - worldPos.x) < 0.01 && Math.abs(z.y - worldPos.y) < 0.01 && Math.abs(z.z - worldPos.z) < 0.01) {
+            return;
+        }
+    }
+    const q = worldQuat;
+    const yaw = Math.atan2(2 * (q.w * q.y + q.x * q.z), 1 - 2 * (q.y * q.y + q.z * q.z));
+    window.BOOST_ZONES.push({
+        x: worldPos.x, y: worldPos.y, z: worldPos.z,
+        yaw,
+        halfWidth: 2.2,
+        halfLength: 2.6,
+        strength: 1
+    });
+};
 
 // If a booster pushes the car backwards instead of forwards, flip this to -1.
 window.BOOST_FORWARD_SIGN = 1;
